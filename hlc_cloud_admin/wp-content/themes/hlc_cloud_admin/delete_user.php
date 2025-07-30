@@ -1,7 +1,7 @@
 <?php
 /**
  * The main template file
- * Template Name: Hlc User
+ * Template Name: Delete User
  * This is the most generic template file in a WordPress theme
  * and one of the two required files for a theme (the other being style.css).
  * It is used to display a page when nothing more specific matches a query.
@@ -15,20 +15,23 @@
 function get_all_users($conn){
     $response_data = array("status"=>false,'message'=>"Something went wrong...!");
     if($conn){
-         $sql = "SELECT * from heat_load_subscription GROUP BY pid ORDER BY id DESC;";
+        $pid = $_GET['pid'];
+         $sql = "DELETE from heat_load_subscription WHERE pid = '$pid'";;
          $result = mysqli_query($conn, $sql);
          return $result;
         }
 }
 
-
 try{
-   include 'db_con.php';
-   $response = get_all_users($conn);
+    include 'db_con.php';
+    if ($conn->connect_error) {
+        echo json_encode(False);
+    }
+    $response = get_all_users($conn);
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
 }catch (Exception $e) {
     echo json_encode(False);
 }
-
 
 get_header();
 ?>
@@ -40,13 +43,7 @@ get_header();
         <div class="row g-4">
             <div class="col-12">
                 <div class="bg-light rounded h-100 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="mb-0">Responsive Table</h6>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <a href="insert_user.php" class="btn btn-primary mx-1"><i class="fa fa-plus"
-                                    aria-hidden="true"></i> New User</a>
-                        </div>
-                    </div>
+                    <h6 class="mb-4">Responsive Table</h6>
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
@@ -86,11 +83,8 @@ get_header();
                                         <?php  $ischecked = "";if( $row['is_active']==1){$ischecked="checked";} ?>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" <?php echo $ischecked; ?>
-                                            onclick="updateStatus('
-                                            <?php echo $row['pid']; ?>','
-                                            <?php echo $row['user_id'];?>','
-                                            <?php echo $ischecked;?>');"
-                                            type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                            type="checkbox" role="switch"
+                                            id="flexSwitchCheckDefault">
                                             <label class="form-check-label" for="flexSwitchCheckDefault"></label>
                                         </div>
                                     </td>
@@ -101,18 +95,31 @@ get_header();
                                         <?php echo $row['subscription_end'];?>
                                     </td>
                                     <td>
-                                        <a href="view_user.php?id=<?php echo $row['pid']; ?>" title="View">
-                                            <i class="fas fa-eye" style="color:green; margin-right:8px;"></i>
-                                        </a>
-                                        <a href="insert_user.php?id=<?php echo $row['pid']; ?>" title="Edit">
-                                            <i class="fas fa-edit" style="color:#009cff85; margin-right:8px;"></i>
-                                        </a>
-                                        <a href="delete_user.php?pid=<?php echo $row['pid']; ?>"
-                                            onclick="return confirm('Are you sure you want to delete this user?');"
-                                            title="Delete">
-                                            <i class="fa fa-trash" style="color:#ff0000a8;"></i>
-                                        </a>
+                                        <div class="btn-group">
+                                            <!-- Trigger button with just ... -->
+                                            <button class="btn btn-link text-dark no-arrow m-0 p-0"
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                ...
+                                            </button>
+
+                                            <!-- Dropdown menu with two options -->
+                                            <div class="dropdown-menu dropdown-menu-start mt-2 py-1">
+                                                <!-- View Project -->
+                                                <a href="view_user.php?id=<?php echo $row['id']; ?>"
+                                                    class="dropdown-item">
+                                                    View Project
+                                                </a>
+                                                <!-- Delete Project -->
+                                                <a href="delete_project.php?pid=<?php echo $row['pid']; ?>"
+                                                    class="dropdown-item text-danger"
+                                                    onclick="return confirm('Are you sure you want to delete this project?');">
+                                                    Delete Project
+                                                </a>
+                                            </div>
+                                        </div>
                                     </td>
+
+
                                 </tr>
                                 <?php 
                                         }
@@ -127,19 +134,24 @@ get_header();
         </div>
     </div>
     <!-- Table End -->
+
+
+    <!-- Footer Start -->
+    <div class="container-fluid pt-4 px-4">
+        <div class="bg-light rounded-top p-4">
+            <div class="row">
+                <div class="col-12 col-sm-6 text-center text-sm-end">
+                    <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
+                    Designed By <a href="https://htmlcodex.com">Leal Software Solution</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
 </div>
 <!-- Content End -->
 
-<script>
-    function updateStatus(pid, user_id, isChecked) {
-        const confirmUpdate = confirm('Are you sure you want to update the status?');
-        if (confirmUpdate) {
-            const is_active = isChecked ? 1 : 0;
-            window.location.href = `update_status.php?pid=${pid}&user_id=${user_id}&is_active=${is_active}`;
-        }
-    }
-</script>
+</div>
 <?php
 
-// get_sidebar();
 get_footer();
